@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:whiprepair/page/my_service.dart';
 import 'package:whiprepair/page/register.dart';
 import 'package:whiprepair/utility/my_style.dart';
+import 'package:whiprepair/utility/normal_dialog.dart';
 
 class Authen extends StatefulWidget {
   @override
@@ -10,33 +13,50 @@ class Authen extends StatefulWidget {
 
 class _AuthenState extends State<Authen> {
   bool status = true;
+  bool statusLogin = true;
+  String user, password;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkPreferance();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            radius: 1.0,
-            colors: <Color>[
-              Colors.white,
-              MyStyle().primaryColor,
-            ],
-          ),
+      body: statusLogin
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : buildContainer(),
+    );
+  }
+
+  Container buildContainer() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          radius: 1.0,
+          colors: <Color>[
+            Colors.white,
+            MyStyle().primaryColor,
+          ],
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                buildLogo(),
-                buildText(),
-                buildUser(),
-                buildPassword(),
-                buildRaisedButton(),
-                buildFlatButton()
-              ],
-            ),
+      ),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              buildLogo(),
+              buildText(),
+              buildUser(),
+              buildPassword(),
+              buildRaisedButton(),
+              buildFlatButton()
+            ],
           ),
         ),
       ),
@@ -59,7 +79,15 @@ class _AuthenState extends State<Authen> {
         width: 250,
         child: RaisedButton(
           color: MyStyle().darkColor,
-          onPressed: () {},
+          onPressed: () {
+            print('user = $user, password = $password');
+            if (user == null ||
+                user.isEmpty ||
+                password == null ||
+                password.isEmpty) {
+              normalDialog(context, 'Please Fill Every Blank');
+            }
+          },
           child: Text(
             'Login',
             style: TextStyle(color: Colors.white),
@@ -72,6 +100,7 @@ class _AuthenState extends State<Authen> {
       margin: EdgeInsets.only(top: 16),
       width: 250,
       child: TextField(
+        onChanged: (value) => user = value.trim(),
         decoration: InputDecoration(
           labelStyle: TextStyle(color: MyStyle().darkColor),
           labelText: 'User :',
@@ -87,12 +116,12 @@ class _AuthenState extends State<Authen> {
 
   //Test
 
-
   Container buildPassword() {
     return Container(
       margin: EdgeInsets.only(top: 16),
       width: 250,
       child: TextField(
+        onChanged: (value) => password = value.trim(),
         obscureText: status,
         decoration: InputDecoration(
           suffixIcon: IconButton(
@@ -132,5 +161,25 @@ class _AuthenState extends State<Authen> {
       width: 120,
       child: Image.asset('images/logo.png'),
     );
+  }
+
+  Future<Null> checkPreferance() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    if (preferences.getString('User') != null) {
+      moveToService();
+    } else {
+      setState(() {
+        statusLogin = false;
+      });
+    }
+  }
+
+  void moveToService() {
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyService(),
+        ),
+        (route) => false);
   }
 }

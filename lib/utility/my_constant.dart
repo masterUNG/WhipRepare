@@ -1,6 +1,6 @@
 class MyConstant {
 
-  String domain ='http://b4c61a562f32.ngrok.io';
+  String domain ='https://03bc21b85589.ngrok.io';
 
   List<String> positions = [
     'ผู้จัดการฝ่ายกิจกรรม (Events Manager)',

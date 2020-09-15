@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whiprepair/utility/my_constant.dart';
 import 'package:whiprepair/utility/my_style.dart';
 import 'package:whiprepair/utility/normal_dialog.dart';
@@ -151,12 +152,20 @@ class _RegisterState extends State<Register> {
 
   Future<Null> registerProcess() async {
     String url =
-        'http://b4c61a562f32.ngrok.io/tisi/addUser.php?isAdd=true&Name=$name&User=$user&Password=$password&Position=$positionChoose';
+        '${MyConstant().domain}/tisi/addUser.php?isAdd=true&Name=$name&User=$user&Password=$password&Position=$positionChoose';
     Response response = await Dio().get(url);
     if (response.toString() == 'true') {
-      Navigator.pop(context);
+      saveSharedPreferance();
     } else {
       normalDialog(context, 'Please Try Againg');
     }
+  }
+
+  Future<Null> saveSharedPreferance() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString('User', user);
+    preferences.setString('Name', name);
+    preferences.setString('Position', positionChoose);
+    Navigator.pop(context);
   }
 }
