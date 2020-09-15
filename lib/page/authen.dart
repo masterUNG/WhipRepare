@@ -1,8 +1,13 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:whiprepair/models/user_model.dart';
 import 'package:whiprepair/page/my_service.dart';
 import 'package:whiprepair/page/register.dart';
+import 'package:whiprepair/utility/my_constant.dart';
 import 'package:whiprepair/utility/my_style.dart';
 import 'package:whiprepair/utility/normal_dialog.dart';
 
@@ -86,6 +91,8 @@ class _AuthenState extends State<Authen> {
                 password == null ||
                 password.isEmpty) {
               normalDialog(context, 'Please Fill Every Blank');
+            } else {
+              checkAuthentication();
             }
           },
           child: Text(
@@ -181,5 +188,30 @@ class _AuthenState extends State<Authen> {
           builder: (context) => MyService(),
         ),
         (route) => false);
+  }
+
+  Future<Null> checkAuthentication() async {
+    String url =
+        '${MyConstant().domain}/tisi/getUserWhereUser.php?isAdd=true&User=$user';
+    await Dio().get(url).then((value) {
+      if (value.toString() == 'null') {
+        normalDialog(context, 'No $user in my Database');
+      } else {
+        var result = json.decode(value.data);
+        for (var json in result) {
+          UserModel model = UserModel.fromJson(json);
+          if (password == model.password) {
+            savePreferance(model);
+          } else {
+            normalDialog(context, 'Password False Please Try Again');
+          }
+        }
+      }
+    });
+  }
+
+  Future<Null> savePreferance(UserModel userModel) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString('key', value)
   }
 }
